@@ -25,12 +25,29 @@ class BookController {
         }
     }
 
-    getBook(req: Request, res: Response) {
-        // TODO: implement functionality
-        return res.status(500).json({
-            error: 'server_error',
-            error_description: 'Endpoint not implemented yet.',
-        });
+    async getBook(req: Request, res: Response) {
+        const id = parseInt(req.params.id);
+
+        if (isNaN(id)) {
+            return res.status(400).json({ error: 'Invalid ID' });
+        }
+
+        try {
+            const pool = await (await import('../db')).default;
+            const result = await pool
+                .request()
+                .input('id', id)
+                .query('SELECT * FROM book WHERE id = @id');
+
+            if (result.recordset.length === 0) {
+                return res.status(404).json({ error: 'Book not found' });
+            }
+
+            res.json(result.recordset[0]);
+        } catch (error) {
+            console.error('Error fetching book:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
     }
 
     async createBook(req: Request, res: Response) {
