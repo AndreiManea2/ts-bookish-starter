@@ -6,21 +6,18 @@ import poolPromise from '../db';
 const router = Router();
 
 router.post('/register', async (req: Request, res: Response) => {
-    const { id, username, email, password } = req.body;
-
-    console.log('Register request body:', { id, username, email, password });
+    const { username, email, password } = req.body;
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         const pool = await poolPromise;
         await pool
             .request()
-            .input('id', id)
             .input('username', username)
             .input('email', email)
             .input('password_hash', hashedPassword)
             .query(
-                'INSERT INTO "user" (id, username, email, password_hash) VALUES (@id, @username, @email, @password_hash)'
+                'INSERT INTO "user" (username, email, password_hash) VALUES (@username, @email, @password_hash)'
             );
         res.status(201).json({ message: 'User registered' });
     } catch (err) {

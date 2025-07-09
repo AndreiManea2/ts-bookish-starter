@@ -34,15 +34,14 @@ class BookController {
     }
 
     async createBook(req: Request, res: Response) {
-        const { id, title, isbn } = req.body;
+        const { title, isbn } = req.body;
         try {
             const pool = await (await import('../db')).default;
             await pool
                 .request()
-                .input('id', id)
                 .input('title', title)
                 .input('isbn', isbn)
-                .query('INSERT INTO book (id, title, isbn) VALUES (@id, @title, @isbn)');
+                .query('INSERT INTO book (title, isbn) VALUES (@title, @isbn)');
             res.status(201).json({ message: 'Book created successfully.' });
         } catch (error) {
             res.status(500).json({ error: 'Failed to add book' });
