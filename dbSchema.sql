@@ -1,0 +1,51 @@
+-- USERS
+CREATE TABLE [user] (
+    id INT PRIMARY KEY IDENTITY(1,1),
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash NVARCHAR(MAX) NOT NULL
+);
+
+-- BOOK
+CREATE TABLE book (
+    id INT PRIMARY KEY IDENTITY(1,1),
+    title VARCHAR(255) NOT NULL,
+    isbn VARCHAR(20) UNIQUE NOT NULL
+);
+
+-- AUTHOR
+CREATE TABLE author (
+    id INT PRIMARY KEY IDENTITY(1,1),
+    name VARCHAR(255) NOT NULL
+);
+
+-- BOOKAUTHOR
+CREATE TABLE bookauthor (
+   book_id INT NOT NULL REFERENCES book(id) ON DELETE CASCADE,
+   author_id INT NOT NULL REFERENCES author(id) ON DELETE CASCADE,
+   PRIMARY KEY (book_id, author_id)
+);
+
+-- COPY
+CREATE TABLE copy (
+   id INT PRIMARY KEY IDENTITY(1,1),
+   book_id INT NOT NULL REFERENCES book(id) ON DELETE CASCADE
+);
+
+-- CHECKOUT
+CREATE TABLE checkout (
+   id INT PRIMARY KEY IDENTITY(1,1),
+   copy_id INT NOT NULL REFERENCES copy(id) ON DELETE CASCADE,
+   user_id INT NOT NULL REFERENCES [user](id) ON DELETE CASCADE,
+   checkout_date DATE NOT NULL,
+   due_date DATE NOT NULL
+);
+
+
+-- Insertions into BOOK
+INSERT INTO book (title, isbn) VALUES
+    ('The Great Gatsby', '9780743273565'),
+    ('To Kill a Mockingbird', '9780061120084'),
+    ('1984', '9780451524935'),
+    ('Pride and Prejudice', '9780141439518'),
+    ('The Catcher in the Rye', '9780316769488');
