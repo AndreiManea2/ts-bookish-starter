@@ -1,4 +1,3 @@
-// services/bookService.ts
 import poolPromise from '../db';
 import { Book } from '../models/book';
 

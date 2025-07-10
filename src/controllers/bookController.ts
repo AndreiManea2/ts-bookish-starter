@@ -10,6 +10,8 @@ class BookController {
 
         this.router.get('/', this.getAllBooks.bind(this));
 
+        this.router.get('/search', this.searchBooks.bind(this));
+
         this.router.get('/:id', this.getBook.bind(this));
 
         this.router.post('/', authenticateToken, this.createBook.bind(this));
@@ -103,11 +105,11 @@ class BookController {
             // Insert copies
             for (let i = 0; i < numberOfCopies; i++) {
                 await transaction
-                    .request() // new request for each iteration
+                    .request()
                     .input('bookId', bookId)
                     .query('INSERT INTO copy (book_id) VALUES (@bookId)');
             }
-            
+
             await transaction.commit();
 
             res.status(201).json({ message: 'Book created successfully.' });
@@ -116,6 +118,35 @@ class BookController {
             res.status(500).json({ error: 'Failed to add book' });
         }
     }
+
+    async searchBooks(req: Request, res: Response) {
+        const { query } = req.query;
+
+        if (!query || typeof query !== 'string') {
+            return res.status(400).json({ error: 'Query parameter is required' });
+        }
+
+        try {
+            const pool = await (await import('../db')).default;
+
+            const result = await pool.request()
+                .input('query', `%${query}%`)
+                .query(`
+                    SELECT DISTINCT b.id, b.title, b.isbn
+                    FROM book b
+                    LEFT JOIN bookauthor ba ON b.id = ba.book_id
+                    LEFT JOIN author a ON a.id = ba.author_id
+                    WHERE b.title LIKE @query OR a.name LIKE @query
+                    ORDER BY b.title ASC
+                `);
+
+            res.json(result.recordset);
+        } catch (error) {
+            console.error('Search error:', error);
+            res.status(500).json({ error: 'Failed to search books' });
+        }
+    }
+
 }
 
 export default new BookController().router;
