@@ -7,7 +7,7 @@ class UserController {
     constructor() {
         this.router = Router();
 
-        this.router.get('/myCheckouts', authenticateToken, this.getUserCheckouts.bind(this));
+        this.router.get('/my-checkouts', authenticateToken, this.getUserCheckouts.bind(this));
 
         this.router.post('/checkout', authenticateToken, this.checkoutBook.bind(this));
     }
